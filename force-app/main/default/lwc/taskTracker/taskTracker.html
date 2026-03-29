@@ -1,0 +1,99 @@
+<template>
+    <lightning-card title="Task Tracker" icon-name="standard:task">
+        <div class="slds-p-around_medium">
+            <div class="summary-grid">
+                <div class="summary-box">
+                    <p class="summary-label">Total</p>
+                    <p class="summary-value">{totalCount}</p>
+                </div>
+                <div class="summary-box pending-box">
+                    <p class="summary-label">Pending</p>
+                    <p class="summary-value">{pendingCount}</p>
+                </div>
+                <div class="summary-box completed-box">
+                    <p class="summary-label">Completed</p>
+                    <p class="summary-value">{completedCount}</p>
+                </div>
+            </div>
+
+            <div class="form-grid slds-m-top_medium">
+                <lightning-input
+                    label="Subject"
+                    value={subject}
+                    data-field="subject"
+                    onchange={handleInputChange}
+                    required
+                ></lightning-input>
+                <lightning-combobox
+                    label="Status"
+                    value={status}
+                    options={statusOptions}
+                    data-field="status"
+                    onchange={handleInputChange}
+                ></lightning-combobox>
+                <lightning-combobox
+                    label="Priority"
+                    value={priority}
+                    options={priorityOptions}
+                    data-field="priority"
+                    onchange={handleInputChange}
+                ></lightning-combobox>
+                <lightning-input
+                    type="date"
+                    label="Due Date"
+                    value={dueDate}
+                    data-field="dueDate"
+                    onchange={handleInputChange}
+                ></lightning-input>
+            </div>
+
+            <div class="slds-m-top_medium">
+                <lightning-button
+                    variant="brand"
+                    label="Create Task"
+                    onclick={handleCreateTask}
+                ></lightning-button>
+            </div>
+
+            <div class="slds-m-top_large">
+                <h3 class="section-title">Pending Tasks</h3>
+                <template if:true={hasPendingTasks}>
+                    <template for:each={pendingTasks} for:item="task">
+                        <div key={task.Id} class={task.rowClass}>
+                            <div>
+                                <p class="task-subject">{task.Subject}</p>
+                                <p class="task-meta">Status: {task.Status} | Priority: {task.Priority} | Due: {task.ActivityDate}</p>
+                            </div>
+                            <lightning-button
+                                label="Mark Complete"
+                                variant="success"
+                                data-id={task.Id}
+                                onclick={handleMarkCompleted}
+                            ></lightning-button>
+                        </div>
+                    </template>
+                </template>
+                <template if:false={hasPendingTasks}>
+                    <p class="empty-msg">No pending tasks.</p>
+                </template>
+            </div>
+
+            <div class="slds-m-top_large slds-m-bottom_small">
+                <h3 class="section-title">Completed Tasks</h3>
+                <template if:true={hasCompletedTasks}>
+                    <template for:each={completedTasks} for:item="task">
+                        <div key={task.Id} class={task.rowClass}>
+                            <div>
+                                <p class="task-subject">{task.Subject}</p>
+                                <p class="task-meta">Status: {task.Status} | Priority: {task.Priority} | Due: {task.ActivityDate}</p>
+                            </div>
+                        </div>
+                    </template>
+                </template>
+                <template if:false={hasCompletedTasks}>
+                    <p class="empty-msg">No completed tasks yet.</p>
+                </template>
+            </div>
+        </div>
+    </lightning-card>
+</template>
