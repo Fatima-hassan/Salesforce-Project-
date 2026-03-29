@@ -18,6 +18,9 @@ export default class TaskTracker extends LightningElement {
     @track editingTaskName = '';
     @track editingDueDateTaskId = null;
     @track editingDueDateValue = '';
+    @track recentlyUpdatedTaskId = null;
+    @track recentlyUpdatedVariant = false;
+    resetRecentlyUpdatedTimer;
 
     wiredTaskResult;
     @track tasks = [];
@@ -41,7 +44,7 @@ export default class TaskTracker extends LightningElement {
                 return {
                     ...task,
                     isOverdue,
-                    rowClass: isOverdue ? 'task-row overdue' : 'task-row pending',
+                    rowClass: this.getRowClass(isOverdue ? 'task-row overdue' : 'task-row pending', task.Id),
                     dueDateDisplay: this.formatDueDate(task.ActivityDate),
                     isEditing: this.editingTaskId === task.Id,
                     isEditingDueDate: this.editingDueDateTaskId === task.Id
@@ -54,7 +57,7 @@ export default class TaskTracker extends LightningElement {
             .filter((task) => task.Status === 'Completed')
             .map((task) => ({
                 ...task,
-                rowClass: 'task-row completed',
+                rowClass: this.getRowClass('task-row completed', task.Id),
                 dueDateDisplay: this.formatDueDate(task.ActivityDate),
                 isEditing: this.editingTaskId === task.Id,
                 isEditingDueDate: this.editingDueDateTaskId === task.Id
@@ -187,12 +190,14 @@ export default class TaskTracker extends LightningElement {
         }
 
         try {
+            const updatedTaskId = this.editingTaskId;
             await updateTaskName({
                 taskId: this.editingTaskId,
                 newName: this.editingTaskName
             });
             await refreshApex(this.wiredTaskResult);
             this.cancelEditing();
+            this.triggerRecentlyUpdatedHighlight(updatedTaskId);
             this.showToast('Success', 'Task name updated', 'success');
         } catch (error) {
             this.showToast('Error', this.extractError(error), 'error');
@@ -238,12 +243,14 @@ export default class TaskTracker extends LightningElement {
         }
 
         try {
+            const updatedTaskId = this.editingDueDateTaskId;
             await updateTaskDueDate({
                 taskId: this.editingDueDateTaskId,
                 newDueDate: this.editingDueDateValue || null
             });
             await refreshApex(this.wiredTaskResult);
             this.cancelDueDateEditing();
+            this.triggerRecentlyUpdatedHighlight(updatedTaskId);
             this.showToast('Success', 'Task due date updated', 'success');
         } catch (error) {
             this.showToast('Error', this.extractError(error), 'error');
@@ -322,6 +329,28 @@ export default class TaskTracker extends LightningElement {
     cancelDueDateEditing() {
         this.editingDueDateTaskId = null;
         this.editingDueDateValue = '';
+    }
+
+    getRowClass(baseClass, taskId) {
+        if (this.recentlyUpdatedTaskId !== taskId) {
+            return baseClass;
+        }
+        const animationClass = this.recentlyUpdatedVariant
+            ? 'recently-updated-flash-a'
+            : 'recently-updated-flash-b';
+        return `${baseClass} ${animationClass}`;
+    }
+
+    triggerRecentlyUpdatedHighlight(taskId) {
+        if (this.resetRecentlyUpdatedTimer) {
+            clearTimeout(this.resetRecentlyUpdatedTimer);
+        }
+        this.recentlyUpdatedVariant = !this.recentlyUpdatedVariant;
+        this.recentlyUpdatedTaskId = taskId;
+        this.resetRecentlyUpdatedTimer = setTimeout(() => {
+            this.recentlyUpdatedTaskId = null;
+            this.resetRecentlyUpdatedTimer = null;
+        }, 2000);
     }
 
     showToast(title, message, variant) {
