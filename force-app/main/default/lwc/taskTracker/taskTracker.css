@@ -57,6 +57,11 @@
     border-left: 4px solid #ea001e;
 }
 
+.task-row.overdue {
+    background-color: #ffe3e3;
+    border-left: 4px solid #ba0517;
+}
+
 .task-row.completed {
     background-color: #f1faf4;
     border-left: 4px solid #2e844a;
@@ -71,6 +76,12 @@
     color: #444;
     margin: 0.2rem 0 0;
     font-size: 0.85rem;
+}
+
+.overdue-badge {
+    background-color: #ba0517;
+    color: #ffffff;
+    border: 0;
 }
 
 .empty-msg {

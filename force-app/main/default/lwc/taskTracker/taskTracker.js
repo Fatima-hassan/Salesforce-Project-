@@ -10,6 +10,7 @@ export default class TaskTracker extends LightningElement {
     @track status = 'Not Started';
     @track priority = 'Normal';
     @track dueDate;
+    @track showOnlyPending = false;
 
     wiredTaskResult;
     @track tasks = [];
@@ -25,15 +26,28 @@ export default class TaskTracker extends LightningElement {
     }
 
     get pendingTasks() {
+        // Compute row state client-side so overdue updates without Apex changes.
         return this.tasks
             .filter((task) => task.Status !== 'Completed')
-            .map((task) => ({ ...task, rowClass: 'task-row pending' }));
+            .map((task) => {
+                const isOverdue = this.isTaskOverdue(task);
+                return {
+                    ...task,
+                    isOverdue,
+                    rowClass: isOverdue ? 'task-row overdue' : 'task-row pending',
+                    dueDateDisplay: this.formatDueDate(task.ActivityDate)
+                };
+            });
     }
 
     get completedTasks() {
         return this.tasks
             .filter((task) => task.Status === 'Completed')
-            .map((task) => ({ ...task, rowClass: 'task-row completed' }));
+            .map((task) => ({
+                ...task,
+                rowClass: 'task-row completed',
+                dueDateDisplay: this.formatDueDate(task.ActivityDate)
+            }));
     }
 
     get totalCount() {
@@ -56,6 +70,10 @@ export default class TaskTracker extends LightningElement {
         return this.completedTasks.length > 0;
     }
 
+    get showCompletedSection() {
+        return !this.showOnlyPending;
+    }
+
     statusOptions = [
         { label: 'Not Started', value: 'Not Started' },
         { label: 'In Progress', value: 'In Progress' },
@@ -71,6 +89,10 @@ export default class TaskTracker extends LightningElement {
     handleInputChange(event) {
         const field = event.target.dataset.field;
         this[field] = event.target.value;
+    }
+
+    handlePendingToggle(event) {
+        this.showOnlyPending = event.target.checked;
     }
 
     async handleCreateTask() {
@@ -112,6 +134,26 @@ export default class TaskTracker extends LightningElement {
 
     extractError(error) {
         return error?.body?.message || 'Unexpected error occurred.';
+    }
+
+    isTaskOverdue(task) {
+        if (!task?.ActivityDate || task.Status === 'Completed') {
+            return false;
+        }
+        const today = new Date().toISOString().split('T')[0];
+        return task.ActivityDate < today;
+    }
+
+    formatDueDate(activityDate) {
+        if (!activityDate) {
+            return 'No due date';
+        }
+        const parsedDate = new Date(activityDate);
+        return new Intl.DateTimeFormat('en-US', {
+            year: 'numeric',
+            month: 'short',
+            day: '2-digit'
+        }).format(parsedDate);
     }
 
     showToast(title, message, variant) {

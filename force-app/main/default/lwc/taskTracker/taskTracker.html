@@ -55,14 +55,28 @@
                 ></lightning-button>
             </div>
 
+            <div class="slds-m-top_medium">
+                <lightning-input
+                    type="checkbox"
+                    label="Show Only Pending Tasks"
+                    checked={showOnlyPending}
+                    onchange={handlePendingToggle}
+                ></lightning-input>
+            </div>
+
             <div class="slds-m-top_large">
                 <h3 class="section-title">Pending Tasks</h3>
                 <template if:true={hasPendingTasks}>
                     <template for:each={pendingTasks} for:item="task">
                         <div key={task.Id} class={task.rowClass}>
                             <div>
-                                <p class="task-subject">{task.Subject}</p>
-                                <p class="task-meta">Status: {task.Status} | Priority: {task.Priority} | Due: {task.ActivityDate}</p>
+                                <p class="task-subject">
+                                    {task.Subject}
+                                    <template if:true={task.isOverdue}>
+                                        <span class="slds-badge overdue-badge slds-m-left_x-small">Overdue</span>
+                                    </template>
+                                </p>
+                                <p class="task-meta">Status: {task.Status} | Priority: {task.Priority} | Due: {task.dueDateDisplay}</p>
                             </div>
                             <lightning-button
                                 label="Mark Complete"
@@ -78,22 +92,24 @@
                 </template>
             </div>
 
-            <div class="slds-m-top_large slds-m-bottom_small">
-                <h3 class="section-title">Completed Tasks</h3>
-                <template if:true={hasCompletedTasks}>
-                    <template for:each={completedTasks} for:item="task">
-                        <div key={task.Id} class={task.rowClass}>
-                            <div>
-                                <p class="task-subject">{task.Subject}</p>
-                                <p class="task-meta">Status: {task.Status} | Priority: {task.Priority} | Due: {task.ActivityDate}</p>
+            <template if:true={showCompletedSection}>
+                <div class="slds-m-top_large slds-m-bottom_small">
+                    <h3 class="section-title">Completed Tasks</h3>
+                    <template if:true={hasCompletedTasks}>
+                        <template for:each={completedTasks} for:item="task">
+                            <div key={task.Id} class={task.rowClass}>
+                                <div>
+                                    <p class="task-subject">{task.Subject}</p>
+                                    <p class="task-meta">Status: {task.Status} | Priority: {task.Priority} | Due: {task.dueDateDisplay}</p>
+                                </div>
                             </div>
-                        </div>
+                        </template>
                     </template>
-                </template>
-                <template if:false={hasCompletedTasks}>
-                    <p class="empty-msg">No completed tasks yet.</p>
-                </template>
-            </div>
+                    <template if:false={hasCompletedTasks}>
+                        <p class="empty-msg">No completed tasks yet.</p>
+                    </template>
+                </div>
+            </template>
         </div>
     </lightning-card>
 </template>
