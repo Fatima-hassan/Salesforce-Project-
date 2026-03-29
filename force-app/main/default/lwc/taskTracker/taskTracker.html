@@ -78,12 +78,22 @@
                                 </p>
                                 <p class="task-meta">Status: {task.Status} | Priority: {task.Priority} | Due: {task.dueDateDisplay}</p>
                             </div>
-                            <lightning-button
-                                label="Mark Complete"
-                                variant="success"
-                                data-id={task.Id}
-                                onclick={handleMarkCompleted}
-                            ></lightning-button>
+                            <div class="task-actions">
+                                <lightning-button
+                                    label="Mark Complete"
+                                    variant="success"
+                                    data-id={task.Id}
+                                    onclick={handleMarkCompleted}
+                                ></lightning-button>
+                                <lightning-button-icon
+                                    icon-name="utility:delete"
+                                    alternative-text="Delete Task"
+                                    title="Delete Task"
+                                    variant="border-filled"
+                                    data-id={task.Id}
+                                    onclick={handleDeleteTask}
+                                ></lightning-button-icon>
+                            </div>
                         </div>
                     </template>
                 </template>
@@ -101,6 +111,16 @@
                                 <div>
                                     <p class="task-subject">{task.Subject}</p>
                                     <p class="task-meta">Status: {task.Status} | Priority: {task.Priority} | Due: {task.dueDateDisplay}</p>
+                                </div>
+                                <div class="task-actions">
+                                    <lightning-button-icon
+                                        icon-name="utility:delete"
+                                        alternative-text="Delete Task"
+                                        title="Delete Task"
+                                        variant="border-filled"
+                                        data-id={task.Id}
+                                        onclick={handleDeleteTask}
+                                    ></lightning-button-icon>
                                 </div>
                             </div>
                         </template>

@@ -42,4 +42,14 @@ public with sharing class TaskTrackerController {
         t.Status = 'Completed';
         update t;
     }
+
+    @AuraEnabled
+    public static void deleteTask(Id taskId) {
+        if (taskId == null) {
+            throw new AuraHandledException('Task Id is required.');
+        }
+
+        Task t = [SELECT Id FROM Task WHERE Id = :taskId LIMIT 1];
+        delete t;
+    }
 }

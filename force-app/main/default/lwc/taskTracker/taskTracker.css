@@ -52,6 +52,12 @@
     align-items: center;
 }
 
+.task-actions {
+    display: flex;
+    gap: 0.5rem;
+    align-items: center;
+}
+
 .task-row.pending {
     background-color: #fff5f5;
     border-left: 4px solid #ea001e;

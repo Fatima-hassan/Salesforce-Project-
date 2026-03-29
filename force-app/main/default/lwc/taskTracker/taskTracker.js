@@ -2,6 +2,7 @@ import { LightningElement, track, wire } from 'lwc';
 import getTasks from '@salesforce/apex/TaskTrackerController.getTasks';
 import createTask from '@salesforce/apex/TaskTrackerController.createTask';
 import markTaskCompleted from '@salesforce/apex/TaskTrackerController.markTaskCompleted';
+import deleteTask from '@salesforce/apex/TaskTrackerController.deleteTask';
 import { ShowToastEvent } from 'lightning/platformShowToastEvent';
 import { refreshApex } from '@salesforce/apex';
 
@@ -115,7 +116,7 @@ export default class TaskTracker extends LightningElement {
             this.dueDate = null;
 
             await refreshApex(this.wiredTaskResult);
-            this.showToast('Success', 'Task created.', 'success');
+            this.showToast('Success', 'Task created', 'success');
         } catch (error) {
             this.showToast('Error', this.extractError(error), 'error');
         }
@@ -126,7 +127,22 @@ export default class TaskTracker extends LightningElement {
         try {
             await markTaskCompleted({ taskId });
             await refreshApex(this.wiredTaskResult);
-            this.showToast('Success', 'Task marked completed.', 'success');
+            this.showToast('Success', 'Task completed', 'success');
+        } catch (error) {
+            this.showToast('Error', this.extractError(error), 'error');
+        }
+    }
+
+    async handleDeleteTask(event) {
+        const taskId = event.currentTarget.dataset.id;
+        if (!window.confirm('Are you sure you want to delete this task?')) {
+            return;
+        }
+
+        try {
+            await deleteTask({ taskId });
+            await refreshApex(this.wiredTaskResult);
+            this.showToast('Success', 'Task deleted', 'success');
         } catch (error) {
             this.showToast('Error', this.extractError(error), 'error');
         }
@@ -157,6 +173,13 @@ export default class TaskTracker extends LightningElement {
     }
 
     showToast(title, message, variant) {
-        this.dispatchEvent(new ShowToastEvent({ title, message, variant }));
+        this.dispatchEvent(
+            new ShowToastEvent({
+                title,
+                message,
+                variant,
+                mode: 'pester'
+            })
+        );
     }
 }
