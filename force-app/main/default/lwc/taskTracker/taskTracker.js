@@ -44,6 +44,7 @@ export default class TaskTracker extends LightningElement {
                 return {
                     ...task,
                     isOverdue,
+                    isRecentlyUpdated: this.recentlyUpdatedTaskId === task.Id,
                     rowClass: this.getRowClass(isOverdue ? 'task-row overdue' : 'task-row pending', task.Id),
                     dueDateDisplay: this.formatDueDate(task.ActivityDate),
                     isEditing: this.editingTaskId === task.Id,
@@ -57,6 +58,7 @@ export default class TaskTracker extends LightningElement {
             .filter((task) => task.Status === 'Completed')
             .map((task) => ({
                 ...task,
+                isRecentlyUpdated: this.recentlyUpdatedTaskId === task.Id,
                 rowClass: this.getRowClass('task-row completed', task.Id),
                 dueDateDisplay: this.formatDueDate(task.ActivityDate),
                 isEditing: this.editingTaskId === task.Id,

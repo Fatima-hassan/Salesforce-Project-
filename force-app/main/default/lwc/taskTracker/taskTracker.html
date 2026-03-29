@@ -103,6 +103,18 @@
                                         title="Double-click or press Enter to edit task name"
                                     >
                                         {task.Subject}
+                                        <template if:true={task.isRecentlyUpdated}>
+                                            <span class="updated-indicator slds-m-left_x-small" role="status" aria-live="polite">
+                                                <lightning-icon
+                                                    icon-name="utility:check"
+                                                    size="xx-small"
+                                                    alternative-text="Updated"
+                                                    title="Updated"
+                                                ></lightning-icon>
+                                                <span aria-hidden="true">Updated</span>
+                                                <span class="slds-assistive-text">Task recently updated</span>
+                                            </span>
+                                        </template>
                                         <template if:true={task.isOverdue}>
                                             <span class="slds-badge overdue-badge slds-m-left_x-small">Overdue</span>
                                         </template>
@@ -214,6 +226,18 @@
                                             title="Double-click or press Enter to edit task name"
                                         >
                                             {task.Subject}
+                                            <template if:true={task.isRecentlyUpdated}>
+                                                <span class="updated-indicator slds-m-left_x-small" role="status" aria-live="polite">
+                                                    <lightning-icon
+                                                        icon-name="utility:check"
+                                                        size="xx-small"
+                                                        alternative-text="Updated"
+                                                        title="Updated"
+                                                    ></lightning-icon>
+                                                    <span aria-hidden="true">Updated</span>
+                                                    <span class="slds-assistive-text">Task recently updated</span>
+                                                </span>
+                                            </template>
                                         </p>
                                     </template>
                                     <p class="task-meta">
