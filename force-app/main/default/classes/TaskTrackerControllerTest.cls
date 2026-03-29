@@ -46,4 +46,22 @@ private class TaskTrackerControllerTest {
         Integer remaining = [SELECT COUNT() FROM Task WHERE Id = :t.Id ALL ROWS];
         System.assertEquals(0, remaining, 'Task should be deleted.');
     }
+
+    @IsTest
+    static void testUpdateTaskName() {
+        Task t = new Task(
+            Subject = 'Old name',
+            Status = 'Not Started',
+            Priority = 'Normal',
+            ActivityDate = Date.today()
+        );
+        insert t;
+
+        Test.startTest();
+        TaskTrackerController.updateTaskName(t.Id, 'Updated name');
+        Test.stopTest();
+
+        Task updated = [SELECT Subject FROM Task WHERE Id = :t.Id LIMIT 1];
+        System.assertEquals('Updated name', updated.Subject, 'Task subject should be updated.');
+    }
 }

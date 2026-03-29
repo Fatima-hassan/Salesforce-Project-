@@ -58,6 +58,16 @@
     align-items: center;
 }
 
+.editable-subject {
+    cursor: pointer;
+}
+
+.editable-subject:focus {
+    outline: 2px solid #1b96ff;
+    outline-offset: 2px;
+    border-radius: 0.25rem;
+}
+
 .task-row.pending {
     background-color: #fff5f5;
     border-left: 4px solid #ea001e;
@@ -76,6 +86,13 @@
 .task-subject {
     font-weight: 600;
     margin: 0;
+}
+
+.edit-row {
+    display: flex;
+    gap: 0.5rem;
+    align-items: center;
+    margin-bottom: 0.3rem;
 }
 
 .task-meta {

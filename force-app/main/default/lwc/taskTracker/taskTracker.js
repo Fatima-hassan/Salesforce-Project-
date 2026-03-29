@@ -3,6 +3,7 @@ import getTasks from '@salesforce/apex/TaskTrackerController.getTasks';
 import createTask from '@salesforce/apex/TaskTrackerController.createTask';
 import markTaskCompleted from '@salesforce/apex/TaskTrackerController.markTaskCompleted';
 import deleteTask from '@salesforce/apex/TaskTrackerController.deleteTask';
+import updateTaskName from '@salesforce/apex/TaskTrackerController.updateTaskName';
 import { ShowToastEvent } from 'lightning/platformShowToastEvent';
 import { refreshApex } from '@salesforce/apex';
 
@@ -12,6 +13,8 @@ export default class TaskTracker extends LightningElement {
     @track priority = 'Normal';
     @track dueDate;
     @track showOnlyPending = false;
+    @track editingTaskId = null;
+    @track editingTaskName = '';
 
     wiredTaskResult;
     @track tasks = [];
@@ -36,7 +39,8 @@ export default class TaskTracker extends LightningElement {
                     ...task,
                     isOverdue,
                     rowClass: isOverdue ? 'task-row overdue' : 'task-row pending',
-                    dueDateDisplay: this.formatDueDate(task.ActivityDate)
+                    dueDateDisplay: this.formatDueDate(task.ActivityDate),
+                    isEditing: this.editingTaskId === task.Id
                 };
             });
     }
@@ -47,7 +51,8 @@ export default class TaskTracker extends LightningElement {
             .map((task) => ({
                 ...task,
                 rowClass: 'task-row completed',
-                dueDateDisplay: this.formatDueDate(task.ActivityDate)
+                dueDateDisplay: this.formatDueDate(task.ActivityDate),
+                isEditing: this.editingTaskId === task.Id
             }));
     }
 
@@ -148,6 +153,61 @@ export default class TaskTracker extends LightningElement {
         }
     }
 
+    handleTaskNameActivate(event) {
+        const taskId = event.currentTarget.dataset.id;
+        const taskName = event.currentTarget.dataset.subject;
+        this.startEditing(taskId, taskName);
+    }
+
+    handleTaskNameKeydown(event) {
+        if (event.key === 'Enter' || event.key === ' ') {
+            event.preventDefault();
+            const taskId = event.currentTarget.dataset.id;
+            const taskName = event.currentTarget.dataset.subject;
+            this.startEditing(taskId, taskName);
+        }
+    }
+
+    handleEditingNameChange(event) {
+        this.editingTaskName = event.target.value;
+    }
+
+    async handleSaveTaskName() {
+        if (!this.editingTaskId) {
+            return;
+        }
+        if (!this.editingTaskName || !this.editingTaskName.trim()) {
+            this.showToast('Validation', 'Task name is required.', 'warning');
+            return;
+        }
+
+        try {
+            await updateTaskName({
+                taskId: this.editingTaskId,
+                newName: this.editingTaskName
+            });
+            await refreshApex(this.wiredTaskResult);
+            this.cancelEditing();
+            this.showToast('Success', 'Task name updated', 'success');
+        } catch (error) {
+            this.showToast('Error', this.extractError(error), 'error');
+        }
+    }
+
+    handleEditingKeydown(event) {
+        if (event.key === 'Enter') {
+            event.preventDefault();
+            this.handleSaveTaskName();
+        } else if (event.key === 'Escape') {
+            event.preventDefault();
+            this.cancelEditing();
+        }
+    }
+
+    handleCancelEditing() {
+        this.cancelEditing();
+    }
+
     extractError(error) {
         return error?.body?.message || 'Unexpected error occurred.';
     }
@@ -170,6 +230,23 @@ export default class TaskTracker extends LightningElement {
             month: 'short',
             day: '2-digit'
         }).format(parsedDate);
+    }
+
+    startEditing(taskId, taskName) {
+        this.editingTaskId = taskId;
+        this.editingTaskName = taskName;
+        // Move focus into the inline input after rerender.
+        setTimeout(() => {
+            const input = this.template.querySelector('lightning-input[data-editing-input="true"]');
+            if (input) {
+                input.focus();
+            }
+        }, 0);
+    }
+
+    cancelEditing() {
+        this.editingTaskId = null;
+        this.editingTaskName = '';
     }
 
     showToast(title, message, variant) {

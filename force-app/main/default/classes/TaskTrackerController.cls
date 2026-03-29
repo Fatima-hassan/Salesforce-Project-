@@ -52,4 +52,18 @@ public with sharing class TaskTrackerController {
         Task t = [SELECT Id FROM Task WHERE Id = :taskId LIMIT 1];
         delete t;
     }
+
+    @AuraEnabled
+    public static void updateTaskName(Id taskId, String newName) {
+        if (taskId == null) {
+            throw new AuraHandledException('Task Id is required.');
+        }
+        if (String.isBlank(newName)) {
+            throw new AuraHandledException('Task name is required.');
+        }
+
+        Task t = [SELECT Id, Subject FROM Task WHERE Id = :taskId LIMIT 1];
+        t.Subject = newName.trim();
+        update t;
+    }
 }

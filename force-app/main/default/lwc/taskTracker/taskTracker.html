@@ -70,12 +70,44 @@
                     <template for:each={pendingTasks} for:item="task">
                         <div key={task.Id} class={task.rowClass}>
                             <div>
-                                <p class="task-subject">
-                                    {task.Subject}
-                                    <template if:true={task.isOverdue}>
-                                        <span class="slds-badge overdue-badge slds-m-left_x-small">Overdue</span>
-                                    </template>
-                                </p>
+                                <template if:true={task.isEditing}>
+                                    <div class="edit-row">
+                                        <lightning-input
+                                            value={editingTaskName}
+                                            data-editing-input="true"
+                                            onchange={handleEditingNameChange}
+                                            onkeydown={handleEditingKeydown}
+                                            variant="label-hidden"
+                                        ></lightning-input>
+                                        <lightning-button
+                                            label="Save"
+                                            variant="brand"
+                                            onclick={handleSaveTaskName}
+                                        ></lightning-button>
+                                        <lightning-button
+                                            label="Cancel"
+                                            variant="neutral"
+                                            onclick={handleCancelEditing}
+                                        ></lightning-button>
+                                    </div>
+                                </template>
+                                <template if:false={task.isEditing}>
+                                    <p
+                                        class="task-subject editable-subject"
+                                        tabindex="0"
+                                        role="button"
+                                        data-id={task.Id}
+                                        data-subject={task.Subject}
+                                        ondblclick={handleTaskNameActivate}
+                                        onkeydown={handleTaskNameKeydown}
+                                        title="Double-click or press Enter to edit task name"
+                                    >
+                                        {task.Subject}
+                                        <template if:true={task.isOverdue}>
+                                            <span class="slds-badge overdue-badge slds-m-left_x-small">Overdue</span>
+                                        </template>
+                                    </p>
+                                </template>
                                 <p class="task-meta">Status: {task.Status} | Priority: {task.Priority} | Due: {task.dueDateDisplay}</p>
                             </div>
                             <div class="task-actions">
@@ -109,7 +141,41 @@
                         <template for:each={completedTasks} for:item="task">
                             <div key={task.Id} class={task.rowClass}>
                                 <div>
-                                    <p class="task-subject">{task.Subject}</p>
+                                    <template if:true={task.isEditing}>
+                                        <div class="edit-row">
+                                            <lightning-input
+                                                value={editingTaskName}
+                                                data-editing-input="true"
+                                                onchange={handleEditingNameChange}
+                                                onkeydown={handleEditingKeydown}
+                                                variant="label-hidden"
+                                            ></lightning-input>
+                                            <lightning-button
+                                                label="Save"
+                                                variant="brand"
+                                                onclick={handleSaveTaskName}
+                                            ></lightning-button>
+                                            <lightning-button
+                                                label="Cancel"
+                                                variant="neutral"
+                                                onclick={handleCancelEditing}
+                                            ></lightning-button>
+                                        </div>
+                                    </template>
+                                    <template if:false={task.isEditing}>
+                                        <p
+                                            class="task-subject editable-subject"
+                                            tabindex="0"
+                                            role="button"
+                                            data-id={task.Id}
+                                            data-subject={task.Subject}
+                                            ondblclick={handleTaskNameActivate}
+                                            onkeydown={handleTaskNameKeydown}
+                                            title="Double-click or press Enter to edit task name"
+                                        >
+                                            {task.Subject}
+                                        </p>
+                                    </template>
                                     <p class="task-meta">Status: {task.Status} | Priority: {task.Priority} | Due: {task.dueDateDisplay}</p>
                                 </div>
                                 <div class="task-actions">
