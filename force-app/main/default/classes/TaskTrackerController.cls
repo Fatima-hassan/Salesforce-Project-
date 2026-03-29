@@ -66,4 +66,15 @@ public with sharing class TaskTrackerController {
         t.Subject = newName.trim();
         update t;
     }
+
+    @AuraEnabled
+    public static void updateTaskDueDate(Id taskId, Date newDueDate) {
+        if (taskId == null) {
+            throw new AuraHandledException('Task Id is required.');
+        }
+
+        Task t = [SELECT Id, ActivityDate FROM Task WHERE Id = :taskId LIMIT 1];
+        t.ActivityDate = newDueDate;
+        update t;
+    }
 }

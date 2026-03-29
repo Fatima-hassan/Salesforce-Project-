@@ -4,6 +4,7 @@ import createTask from '@salesforce/apex/TaskTrackerController.createTask';
 import markTaskCompleted from '@salesforce/apex/TaskTrackerController.markTaskCompleted';
 import deleteTask from '@salesforce/apex/TaskTrackerController.deleteTask';
 import updateTaskName from '@salesforce/apex/TaskTrackerController.updateTaskName';
+import updateTaskDueDate from '@salesforce/apex/TaskTrackerController.updateTaskDueDate';
 import { ShowToastEvent } from 'lightning/platformShowToastEvent';
 import { refreshApex } from '@salesforce/apex';
 
@@ -15,6 +16,8 @@ export default class TaskTracker extends LightningElement {
     @track showOnlyPending = false;
     @track editingTaskId = null;
     @track editingTaskName = '';
+    @track editingDueDateTaskId = null;
+    @track editingDueDateValue = '';
 
     wiredTaskResult;
     @track tasks = [];
@@ -40,7 +43,8 @@ export default class TaskTracker extends LightningElement {
                     isOverdue,
                     rowClass: isOverdue ? 'task-row overdue' : 'task-row pending',
                     dueDateDisplay: this.formatDueDate(task.ActivityDate),
-                    isEditing: this.editingTaskId === task.Id
+                    isEditing: this.editingTaskId === task.Id,
+                    isEditingDueDate: this.editingDueDateTaskId === task.Id
                 };
             });
     }
@@ -52,7 +56,8 @@ export default class TaskTracker extends LightningElement {
                 ...task,
                 rowClass: 'task-row completed',
                 dueDateDisplay: this.formatDueDate(task.ActivityDate),
-                isEditing: this.editingTaskId === task.Id
+                isEditing: this.editingTaskId === task.Id,
+                isEditingDueDate: this.editingDueDateTaskId === task.Id
             }));
     }
 
@@ -208,6 +213,57 @@ export default class TaskTracker extends LightningElement {
         this.cancelEditing();
     }
 
+    handleDueDateActivate(event) {
+        const taskId = event.currentTarget.dataset.id;
+        const currentDueDate = event.currentTarget.dataset.duedate;
+        this.startEditingDueDate(taskId, currentDueDate);
+    }
+
+    handleDueDateKeydown(event) {
+        if (event.key === 'Enter' || event.key === ' ') {
+            event.preventDefault();
+            const taskId = event.currentTarget.dataset.id;
+            const currentDueDate = event.currentTarget.dataset.duedate;
+            this.startEditingDueDate(taskId, currentDueDate);
+        }
+    }
+
+    handleEditingDueDateChange(event) {
+        this.editingDueDateValue = event.target.value;
+    }
+
+    async handleSaveDueDate() {
+        if (!this.editingDueDateTaskId) {
+            return;
+        }
+
+        try {
+            await updateTaskDueDate({
+                taskId: this.editingDueDateTaskId,
+                newDueDate: this.editingDueDateValue || null
+            });
+            await refreshApex(this.wiredTaskResult);
+            this.cancelDueDateEditing();
+            this.showToast('Success', 'Task due date updated', 'success');
+        } catch (error) {
+            this.showToast('Error', this.extractError(error), 'error');
+        }
+    }
+
+    handleEditingDueDateKeydown(event) {
+        if (event.key === 'Enter') {
+            event.preventDefault();
+            this.handleSaveDueDate();
+        } else if (event.key === 'Escape') {
+            event.preventDefault();
+            this.cancelDueDateEditing();
+        }
+    }
+
+    handleCancelDueDateEditing() {
+        this.cancelDueDateEditing();
+    }
+
     extractError(error) {
         return error?.body?.message || 'Unexpected error occurred.';
     }
@@ -233,6 +289,7 @@ export default class TaskTracker extends LightningElement {
     }
 
     startEditing(taskId, taskName) {
+        this.cancelDueDateEditing();
         this.editingTaskId = taskId;
         this.editingTaskName = taskName;
         // Move focus into the inline input after rerender.
@@ -247,6 +304,24 @@ export default class TaskTracker extends LightningElement {
     cancelEditing() {
         this.editingTaskId = null;
         this.editingTaskName = '';
+    }
+
+    startEditingDueDate(taskId, currentDueDate) {
+        this.cancelEditing();
+        this.editingDueDateTaskId = taskId;
+        this.editingDueDateValue = currentDueDate || '';
+        // Move focus into due date editor after rerender.
+        setTimeout(() => {
+            const input = this.template.querySelector('lightning-input[data-editing-due-date-input="true"]');
+            if (input) {
+                input.focus();
+            }
+        }, 0);
+    }
+
+    cancelDueDateEditing() {
+        this.editingDueDateTaskId = null;
+        this.editingDueDateValue = '';
     }
 
     showToast(title, message, variant) {

@@ -64,4 +64,23 @@ private class TaskTrackerControllerTest {
         Task updated = [SELECT Subject FROM Task WHERE Id = :t.Id LIMIT 1];
         System.assertEquals('Updated name', updated.Subject, 'Task subject should be updated.');
     }
+
+    @IsTest
+    static void testUpdateTaskDueDate() {
+        Task t = new Task(
+            Subject = 'Date update',
+            Status = 'Not Started',
+            Priority = 'Normal',
+            ActivityDate = Date.today()
+        );
+        insert t;
+
+        Date newDate = Date.today().addDays(5);
+        Test.startTest();
+        TaskTrackerController.updateTaskDueDate(t.Id, newDate);
+        Test.stopTest();
+
+        Task updated = [SELECT ActivityDate FROM Task WHERE Id = :t.Id LIMIT 1];
+        System.assertEquals(newDate, updated.ActivityDate, 'Task due date should be updated.');
+    }
 }

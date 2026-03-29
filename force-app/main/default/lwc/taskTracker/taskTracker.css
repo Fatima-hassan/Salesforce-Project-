@@ -68,6 +68,17 @@
     border-radius: 0.25rem;
 }
 
+.editable-due-date {
+    cursor: pointer;
+    text-decoration: underline dotted;
+}
+
+.editable-due-date:focus {
+    outline: 2px solid #1b96ff;
+    outline-offset: 2px;
+    border-radius: 0.25rem;
+}
+
 .task-row.pending {
     background-color: #fff5f5;
     border-left: 4px solid #ea001e;
@@ -93,6 +104,12 @@
     gap: 0.5rem;
     align-items: center;
     margin-bottom: 0.3rem;
+}
+
+.inline-date-edit {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
 }
 
 .task-meta {

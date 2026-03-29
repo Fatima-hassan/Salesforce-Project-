@@ -108,7 +108,47 @@
                                         </template>
                                     </p>
                                 </template>
-                                <p class="task-meta">Status: {task.Status} | Priority: {task.Priority} | Due: {task.dueDateDisplay}</p>
+                                <p class="task-meta">
+                                    Status: {task.Status} | Priority: {task.Priority} |
+                                    <template if:true={task.isEditingDueDate}>
+                                        <span class="inline-date-edit">
+                                            Due:
+                                            <lightning-input
+                                                type="date"
+                                                value={editingDueDateValue}
+                                                data-editing-due-date-input="true"
+                                                onchange={handleEditingDueDateChange}
+                                                onkeydown={handleEditingDueDateKeydown}
+                                                variant="label-hidden"
+                                            ></lightning-input>
+                                            <lightning-button
+                                                label="Save"
+                                                variant="brand"
+                                                onclick={handleSaveDueDate}
+                                            ></lightning-button>
+                                            <lightning-button
+                                                label="Cancel"
+                                                variant="neutral"
+                                                onclick={handleCancelDueDateEditing}
+                                            ></lightning-button>
+                                        </span>
+                                    </template>
+                                    <template if:false={task.isEditingDueDate}>
+                                        <span
+                                            class="editable-due-date"
+                                            tabindex="0"
+                                            role="button"
+                                            data-id={task.Id}
+                                            data-duedate={task.ActivityDate}
+                                            onclick={handleDueDateActivate}
+                                            ondblclick={handleDueDateActivate}
+                                            onkeydown={handleDueDateKeydown}
+                                            title="Click, double-click, or press Enter to edit due date"
+                                        >
+                                            Due: {task.dueDateDisplay}
+                                        </span>
+                                    </template>
+                                </p>
                             </div>
                             <div class="task-actions">
                                 <lightning-button
@@ -176,7 +216,47 @@
                                             {task.Subject}
                                         </p>
                                     </template>
-                                    <p class="task-meta">Status: {task.Status} | Priority: {task.Priority} | Due: {task.dueDateDisplay}</p>
+                                    <p class="task-meta">
+                                        Status: {task.Status} | Priority: {task.Priority} |
+                                        <template if:true={task.isEditingDueDate}>
+                                            <span class="inline-date-edit">
+                                                Due:
+                                                <lightning-input
+                                                    type="date"
+                                                    value={editingDueDateValue}
+                                                    data-editing-due-date-input="true"
+                                                    onchange={handleEditingDueDateChange}
+                                                    onkeydown={handleEditingDueDateKeydown}
+                                                    variant="label-hidden"
+                                                ></lightning-input>
+                                                <lightning-button
+                                                    label="Save"
+                                                    variant="brand"
+                                                    onclick={handleSaveDueDate}
+                                                ></lightning-button>
+                                                <lightning-button
+                                                    label="Cancel"
+                                                    variant="neutral"
+                                                    onclick={handleCancelDueDateEditing}
+                                                ></lightning-button>
+                                            </span>
+                                        </template>
+                                        <template if:false={task.isEditingDueDate}>
+                                            <span
+                                                class="editable-due-date"
+                                                tabindex="0"
+                                                role="button"
+                                                data-id={task.Id}
+                                                data-duedate={task.ActivityDate}
+                                                onclick={handleDueDateActivate}
+                                                ondblclick={handleDueDateActivate}
+                                                onkeydown={handleDueDateKeydown}
+                                                title="Click, double-click, or press Enter to edit due date"
+                                            >
+                                                Due: {task.dueDateDisplay}
+                                            </span>
+                                        </template>
+                                    </p>
                                 </div>
                                 <div class="task-actions">
                                     <lightning-button-icon
